@@ -2,6 +2,7 @@ defmodule Echoes.File do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @timestamps_opts [type: :utc_datetime_usec]
   schema "files" do
     field :filename, :string
     field :type, :string

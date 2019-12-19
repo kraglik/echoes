@@ -22,7 +22,7 @@ defmodule EchoesWeb.RegisterController do
             conn
             |> render(
                  "registered.json",
-                 %{id: user.id, token: Guardian.encode_and_sign(user)}
+                 %{user: user, token: Guardian.encode_and_sign(user)}
                )
         end
       errors ->

@@ -10,12 +10,12 @@ defmodule EchoesWeb.LoginController do
         conn
           |> put_status(403)
           |> put_view(EchoesWeb.LoginView)
-          |> render("login.json", %{user: user})
+          |> render("login.json", %{token: nil, user: user})
       {:ok,    user} ->
         token = Guardian.encode_and_sign(user)
         conn
           |> put_view(EchoesWeb.LoginView)
-          |> render("login.json", %{token: token})
+          |> render("login.json", %{token: token, user: user})
     end
   end
 

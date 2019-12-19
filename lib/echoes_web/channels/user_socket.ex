@@ -1,8 +1,10 @@
 defmodule EchoesWeb.UserSocket do
   use Phoenix.Socket
+  alias Echoes.Guardian
 
   ## Channels
   channel "chat:*", EchoesWeb.ChatChannel
+  channel "user:*", EchoesWeb.UserChannel
 
   def connect(%{"token" => token}=_params, socket, _connect_info) do
     case Guardian.decode_and_verify(token) do

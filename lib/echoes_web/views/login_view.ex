@@ -1,18 +1,31 @@
 defmodule EchoesWeb.LoginView do
   use EchoesWeb, :view
   alias EchoesWeb.LoginView
+  alias Echoes.User
 
-  def render("login.json", %{token: {_, token, _}}) do
+  def render("login.json", %{token: {_, token, _}, user: %User{}=user}) do
     %{
       status: :success,
-      token: token
+      token: token,
+      user: %{
+        id: user.id,
+        name: user.name,
+        username: user.username
+      }
     }
   end
 
-  def render("login.json", %{user: nil}) do
+  def render("login.json", %{token: nil, user: nil}) do
     %{
       status: :error,
       reason: "user not found"
+    }
+  end
+
+  def render("login.json", %{token: nil, user: %User{}}) do
+    %{
+      status: :error,
+      reason: "wrong password"
     }
   end
 

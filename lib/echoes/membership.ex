@@ -11,7 +11,7 @@ defmodule Echoes.Membership do
     field :denied, :boolean, default: false
     field :moderator, :boolean, default: false
     field :owner, :boolean, default: false
-    field :pin_order, :integer
+    field :pin_order, :integer, default: -1
     field :user_id, :id
     field :chat_id, :id
 
@@ -39,9 +39,10 @@ defmodule Echoes.Membership do
     end
   end
 
-  def can_post?(user_id, membership_id) do
-    # TODO: implement
-    true
+  def can_post(user_id, membership_id) do
+    with membership = Repo.get(Membership, membership_id) do
+      membership.active and not (membership.banned or membership.denied)
+    end
   end
 
   @doc false

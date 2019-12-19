@@ -4,6 +4,7 @@ defmodule Echoes.Chat do
   import Ecto.Changeset
   alias Echoes.{Repo, User, Chat, Message, Membership}
 
+  @timestamps_opts [type: :utc_datetime_usec]
   schema "chats" do
     field :active, :boolean, default: true
     field :banned, :boolean, default: false
@@ -15,12 +16,14 @@ defmodule Echoes.Chat do
   end
 
   def create_dialog(user_id, other_user_id) do
-    {_, last_event_at} = Ecto.Type.cast(:utc_datetime, DateTime.utc_now)
-    dialog = %Chat{
-      last_event_at: last_event_at,
+
+#    case Repo.one
+    dialog = Repo.insert(%Chat{
+      last_event_at: DateTime.utc_now,
       type: "dialog",
       data: %{}
-    }
+    })
+#    memberships
   end
 
   def get_for_user(user_id, count, offset_count) do
@@ -29,7 +32,21 @@ defmodule Echoes.Chat do
                  where: m.user_id == ^user_id,
                  where: m.active and not (m.banned or m.denied),
                  limit: ^count,
-                 offset: ^offset_count
+                 offset: ^offset_count,
+                 select: c
+    Repo.all(query)
+  end
+
+  def members(%Chat{id: id}=chat) do
+    users_ids = Repo.all(from m in Membership, where: m.chat_id == ^id, select: m.user_id)
+    users = Enum.map(users_ids, fn user_id -> Repo.get(User, user_id) end)
+    Enum.map(users, fn user ->
+      %{
+        id: user.id,
+        name: user.name,
+        username: user.username
+      }
+    end)
   end
 
   @doc false

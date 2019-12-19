@@ -2,7 +2,7 @@ defmodule Echoes.User do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
-  alias Echoes.{Repo, User}
+  alias Echoes.{Repo, User, Blacklist, Membership, Chat}
 
   schema "users" do
     field :active, :boolean, default: true
@@ -19,57 +19,112 @@ defmodule Echoes.User do
   end
 
   def create(name, email, username, password) do
-    {_, dt} = Ecto.Type.cast(:utc_datetime, DateTime.utc_now)
-    Repo.insert(
+    with {_, user} = Repo.insert(
       %User{
         username: username,
         name: name,
         email: email,
         password_hash: Bcrypt.hash_pwd_salt(password),
-        last_online_at: dt
+        last_online_at: DateTime.utc_now
       }
+    ) do
+      user
+    end
+  end
+
+  def blacklisted(user_id, target_user_id) do
+    Repo.one(
+      from b in Blacklist,
+        where: b.owner_id == ^user_id,
+        where: b.user_id == ^target_user_id,
+        select: count(b.id)
     )
+  end
+
+  def add_to_blacklist(user_id, target_user_id) do
+    case blacklisted(user_id, target_user_id) do
+      0 ->
+        Repo.insert(
+          %Blacklist{
+            owner_id: user_id,
+            user_id: target_user_id
+          }
+        )
+        set_dialog_ban_status(user_id, target_user_id, true)
+
+      _ ->
+        nil
+    end
+  end
+
+  def remove_from_blacklist(user_id, target_user_id) do
+    query = from b in Blacklist,
+                 where: b.owner_id == ^user_id,
+                 where: b.user_id == ^target_user_id
+
+    case Repo.one(query) do
+      nil ->
+        false
+
+      bl ->
+        Repo.delete(bl)
+        set_dialog_ban_status(user_id, target_user_id, false)
+        true
+    end
+  end
+
+  defp set_dialog_ban_status(user_id, target_user_id, status) do
+    query = from m in Membership,
+                 inner_join: c in Chat, on: m.chat_id == c.id,
+                 inner_join: m2 in Membership, on: m2.chat_id == c.id and m2.user_id == ^target_user_id,
+                 where: c.type == "dialog",
+                 where: m2.chat_id == m.chat_id,
+                 where: m.user_id == ^user_id,
+                 group_by: m2.id,
+                 select: m2
+
+    case Repo.all(query) do
+      [] ->
+        nil
+      memberships ->
+        Enum.each(memberships, fn(membership) ->
+          Membership.changeset(memberships, %{banned: status})
+          |> Repo.update()
+        end)
+    end
   end
 
   def check_errors(email, username) do
     username_taken(username) ++ email_taken(email)
   end
 
-  def change_password(user, password) do
-    user
+  def update_last_online(user) do
+    {status, user} = user
       |> Ecto.Changeset.change
-      |> Ecto.Changeset.put_change(:password_hash, Bcrypt.hash_pwd_salt(password))
+      |> Ecto.Changeset.put_change(:last_online_at, DateTime.utc_now)
       |> Repo.update()
   end
 
-  def update_last_online(user) do
-    with {_, dt} = Ecto.Type.cast(:utc_datetime, DateTime.utc_now) do
-      {status, user} = user
-        |> Ecto.Changeset.change
-        |> Ecto.Changeset.put_change(:last_online_at, dt)
-        |> Repo.update()
-    end
+  def change_username(user, new_username) do
+    change_user(user, %{username: new_username})
   end
 
-  def change_username(user, new_username) do
-    {_, last_online_at} = Ecto.Type.cast(:utc_datetime, DateTime.utc_now)
-    {status, payload} =
-      Ecto.Changeset.change(user, %{username: new_username})
-        |> Repo.update()
+  def change_email(user, new_email) do
+    change_user(user, %{email: new_email})
+  end
 
-    case status do
-      :ok -> payload
-      :error -> nil
-    end
+  def change_name(user, new_name) do
+    change_user(user, %{name: new_name})
   end
 
   def change_password(user, new_password) do
-    password_hash = Bcrypt.hash_pwd_salt new_password
-    {_, last_online_at} = Ecto.Type.cast(:utc_datetime, DateTime.utc_now)
+    change_user(user, %{password_hash: Bcrypt.hash_pwd_salt(new_password)})
+  end
 
+  defp change_user(user, changes) do
     {status, payload} =
-      Ecto.Changeset.change(user, %{password_hash: password_hash})
-        |> Repo.update()
+      Ecto.Changeset.change(user, changes)
+      |> Repo.update()
 
     case status do
       :ok -> payload

@@ -7,7 +7,8 @@ config :echoes, Echoes.Repo,
   database: "echoes_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: 10,
+  migration_timestamps: [type: :utc_datetime_usec]
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

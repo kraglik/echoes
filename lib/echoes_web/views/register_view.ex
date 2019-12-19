@@ -1,11 +1,16 @@
 defmodule EchoesWeb.RegisterView do
   use EchoesWeb, :view
+  alias Echoes.User
 
-  def render("registered.json", %{token: {_, token, _}, id: id}) do
+  def render("registered.json", %{token: {_, token, _}, user: %User{}=user}) do
     %{
       status: :success,
       token: token,
-      id: id
+      user: %{
+        id: user.id,
+        name: user.name,
+        username: user.username
+      }
     }
   end
 

@@ -2,6 +2,7 @@ defmodule Echoes.Sticker do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @timestamps_opts [type: :utc_datetime_usec]
   schema "stickers" do
     field :message, :string
     field :url, :string

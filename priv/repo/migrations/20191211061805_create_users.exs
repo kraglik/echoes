@@ -9,7 +9,7 @@ defmodule Echoes.Repo.Migrations.CreateUsers do
       add :email, :string, unique: true
       add :name, :string
       add :password_hash, :string
-      add :last_online_at, :utc_datetime
+      add :last_online_at, :utc_datetime_usec
       add :active, :boolean, default: false, null: false
       add :banned, :boolean, default: false, null: false
 

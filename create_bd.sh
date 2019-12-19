@@ -7,7 +7,7 @@ mix phx.gen.schema User users \
   email:string \
   name:string \
   password_hash:string \
-  last_online_at:utc_datetime \
+  last_online_at:utc_datetime_usec \
   active:boolean \
   banned:boolean
 
@@ -23,7 +23,7 @@ sleep 1
 
 mix phx.gen.schema Chat chats \
   type:string \
-  last_event_at:utc_datetime \
+  last_event_at:utc_datetime_usec \
   active:boolean \
   banned:boolean \
   data:map

@@ -2,6 +2,7 @@ defmodule Echoes.StickerPack do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @timestamps_opts [type: :utc_datetime_usec]
   schema "stickerpacks" do
     field :hide_author, :boolean, default: false
     field :title, :string

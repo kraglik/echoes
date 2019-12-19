@@ -4,6 +4,7 @@ defmodule Echoes.Message do
   import Ecto.Query
   alias Echoes.{Repo, Message, MessageRead, User}
 
+  @timestamps_opts [type: :utc_datetime_usec]
   schema "messages" do
     field :content, :map
     field :type, :string
@@ -59,6 +60,16 @@ defmodule Echoes.Message do
                  select: {m, count(r.id)}
 
     get_messages(query)
+  end
+
+  def with_offset(chat_id, limit, offset) do
+    query = from m in Message,
+              where: m.chat_id == ^chat_id,
+              order_by: m.id,
+              limit: ^limit,
+              offset: ^offset
+
+    Repo.all(query)
   end
 
   def before_id_for_user(user_id, message_id, count) do
