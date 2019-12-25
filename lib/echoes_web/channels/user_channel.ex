@@ -61,7 +61,13 @@ defmodule EchoesWeb.UserChannel do
 
                 socket.endpoint.broadcast!("user:#{target_user.id}", "dialog_created", %{
                   body: %{
-                    dialog: dialog,
+                    dialog: %{
+                      id: dialog.id,
+                      type: dialog.type,
+                      data: dialog.data,
+                      members: dialog.members,
+                      last_message: dialog.last_message
+                    },
                     user: %{
                       id: user.id,
                       name: user.name,
@@ -71,7 +77,13 @@ defmodule EchoesWeb.UserChannel do
                 })
                 socket.endpoint.broadcast!("user:#{user_id}", "dialog_created", %{
                   body: %{
-                    dialog: dialog,
+                    dialog: %{
+                      id: dialog.id,
+                      type: dialog.type,
+                      data: dialog.data,
+                      members: dialog.members,
+                      last_message: dialog.last_message
+                    },
                     user: %{
                       id: target_user.id,
                       name: target_user.name,
