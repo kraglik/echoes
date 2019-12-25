@@ -132,7 +132,7 @@ defmodule Echoes.Message do
 
   defp get_messages(query) do
     Repo.all(query)
-    |> Enum.map(fn(message) ->
+    |> Enum.map(fn({message, _}) ->
        Map.put(message, :reads, 1)
      end)
   end
