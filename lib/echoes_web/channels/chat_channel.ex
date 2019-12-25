@@ -78,15 +78,15 @@ defmodule EchoesWeb.ChatChannel do
     {:noreply, socket}
   end
 
-  defp push_loaded_messages(socket, messages, source) do
+  defp push_loaded_messages(socket, messages, direction) do
     push(socket, "messages_loaded", %{
       body: %{
-        source: source,
+        direction: direction,
         messages: Enum.map(messages, fn m ->
           user = Repo.one(User, m.author_id)
           %{
             created_at: m.inserted_at,
-            type: "message",
+            type: m.type,
             content: m.content,
             author: %{
               username: user.username,
