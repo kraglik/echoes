@@ -66,7 +66,7 @@ defmodule EchoesWeb.UserChannel do
                       type: dialog.type,
                       data: dialog.data,
                       members: Chat.members(dialog),
-                      last_message: dialog.last_message
+                      last_message: Message.last_message(dialog.id, socket.assigns.user_id)
                     },
                     user: %{
                       id: user.id,
@@ -82,7 +82,7 @@ defmodule EchoesWeb.UserChannel do
                       type: dialog.type,
                       data: dialog.data,
                       members: Chat.members(dialog),
-                      last_message: dialog.last_message
+                      last_message: Message.last_message(dialog.id, socket.assigns.user_id)
                     },
                     user: %{
                       id: target_user.id,
