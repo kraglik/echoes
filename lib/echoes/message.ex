@@ -75,14 +75,11 @@ defmodule Echoes.Message do
 
   def before_id_for_user(user_id, chat_id, message_id, count) do
     query = from m in Message,
-                 left_join: r in MessageRead,
                  where: m.id < ^message_id,
-                 where: r.user_id == ^user_id,
                  where: m.chat_id == ^chat_id,
                  limit: ^count,
                  group_by: m.id,
-                 order_by: [asc: m.id],
-                 select: {m, count(r.id)}
+                 order_by: [asc: m.id]
 
     get_messages(query)
   end
@@ -150,8 +147,8 @@ defmodule Echoes.Message do
 
   defp get_messages(query) do
     Repo.all(query)
-    |> Enum.map(fn({message, reads_count}) ->
-         Map.put(message, :reads, reads_count)
+    |> Enum.map(fn(message) ->
+         Map.put(message, :reads, 1)
        end)
   end
 
