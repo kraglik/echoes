@@ -131,6 +131,7 @@ defmodule EchoesWeb.UserChannel do
 
   def handle_in("load_chats", %{"offset" => offset}, socket) do
     with chats = Chat.get_for_user(socket.assigns.user_id, 10, offset) do
+      IO.inspect(Message.last_message(c.id, socket.assigns.user_id))
       chats = Enum.map(chats, fn c ->
         %{
           members: Chat.members(c),
