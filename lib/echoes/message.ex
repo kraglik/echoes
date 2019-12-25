@@ -145,7 +145,6 @@ defmodule Echoes.Message do
       [] ->
         nil
     end
-
   end
 
   defp get_messages(query) do
