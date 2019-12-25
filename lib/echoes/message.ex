@@ -83,25 +83,18 @@ defmodule Echoes.Message do
 
   def after_id(message_id, chat_id, count) do
     query = from m in Message,
-                 left_join: r in MessageRead,
                  where: m.id > ^message_id,
                  where: m.chat_id == ^chat_id,
-                 limit: ^count,
-                 group_by: m.id,
-                 select: {m, count(r.id)}
+                 limit: ^count
 
     get_messages(query)
   end
 
   def after_id_for_user(user_id, chat_id, message_id, count) do
     query = from m in Message,
-                 left_join: r in MessageRead,
                  where: m.id > ^message_id,
-                 where: r.user_id == ^user_id,
                  where: m.chat_id == ^chat_id,
-                 limit: ^count,
-                 group_by: m.id,
-                 select: {m, count(r.id)}
+                 limit: ^count
 
     get_messages(query)
   end
@@ -116,14 +109,9 @@ defmodule Echoes.Message do
 
   def last_message(chat_id, user_id) do
     query = from m in Message,
-                 left_join: r in MessageRead,
-                 on: m.id == r.message_id,
-                 on: r.user_id == ^user_id,
                  where: m.chat_id == ^chat_id,
-                 group_by: m.id,
                  order_by: [desc: m.id],
-                 limit: 1,
-                 select: {m, count(r.id)}
+                 limit: 1
 
     case get_messages(query) do
       [message] ->
