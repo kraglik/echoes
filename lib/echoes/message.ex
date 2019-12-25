@@ -53,12 +53,9 @@ defmodule Echoes.Message do
 
   def before_id(message_id, chat_id, count) do
     query = from m in Message,
-                 left_join: r in MessageRead,
                  where: m.id < ^message_id,
                  where: m.chat_id == ^chat_id,
-                 limit: ^count,
-                 group_by: m.id,
-                 select: {m, count(r.id)}
+                 limit: ^count
 
     get_messages(query)
   end
@@ -148,8 +145,8 @@ defmodule Echoes.Message do
   defp get_messages(query) do
     Repo.all(query)
     |> Enum.map(fn(message) ->
-         Map.put(message, :reads, 1)
-       end)
+       Map.put(message, :reads, 1)
+     end)
   end
 
   @doc false
