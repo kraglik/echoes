@@ -83,7 +83,7 @@ defmodule EchoesWeb.ChatChannel do
       body: %{
         direction: direction,
         messages: Enum.map(messages, fn m ->
-          user = Repo.one(User, m.author_id)
+          user = Repo.get(User, m.author_id)
           %{
             created_at: m.inserted_at,
             type: m.type,
