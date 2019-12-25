@@ -15,7 +15,7 @@ defmodule Echoes.Contact do
   @doc false
   def changeset(contact, attrs) do
     contact
-    |> cast(attrs, [:name, :blacklisted])
-    |> validate_required([:name, :blacklisted])
+      |> cast(attrs, [:name, :blacklisted])
+      |> validate_required([:name, :blacklisted])
   end
 end

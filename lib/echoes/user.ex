@@ -19,13 +19,14 @@ defmodule Echoes.User do
   end
 
   def create(name, email, username, password) do
+    {_, dt} = Ecto.Type.cast(:utc_datetime, DateTime.utc_now)
     with {_, user} = Repo.insert(
       %User{
         username: username,
         name: name,
         email: email,
         password_hash: Bcrypt.hash_pwd_salt(password),
-        last_online_at: DateTime.utc_now
+        last_online_at: dt
       }
     ) do
       user
@@ -71,6 +72,15 @@ defmodule Echoes.User do
         set_dialog_ban_status(user_id, target_user_id, false)
         true
     end
+  end
+
+  def find_alike(pattern, offset_value, limit_value) do
+    Repo.all(
+      from u in User,
+        where: like(u.username, ^"%#{String.replace(pattern, "%", "\\%")}%"),
+        offset: ^offset_value,
+        limit: ^limit_value
+    )
   end
 
   defp set_dialog_ban_status(user_id, target_user_id, status) do

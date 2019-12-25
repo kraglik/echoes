@@ -16,24 +16,51 @@ defmodule Echoes.Chat do
   end
 
   def create_dialog(user_id, other_user_id) do
+    query = from m in Membership,
+                 inner_join: c in Chat, on: m.chat_id == c.id,
+                 inner_join: m2 in Membership, on: m2.chat_id == c.id and m2.user_id == ^other_user_id,
 
-#    case Repo.one
-    dialog = Repo.insert(%Chat{
-      last_event_at: DateTime.utc_now,
-      type: "dialog",
-      data: %{}
-    })
-#    memberships
+                 where: c.type == "dialog",
+                 where: m2.chat_id == m.chat_id,
+                 where: m.user_id == ^user_id,
+
+                 group_by: m.chat_id,
+                 select: m.chat_id
+
+     chat_id = Repo.one(query)
+
+     case chat_id do
+       nil ->
+         {_, dt} = Ecto.Type.cast(:utc_datetime, DateTime.utc_now)
+         {_, dialog} = Repo.insert(%Chat{
+           last_event_at: dt,
+           type: "dialog",
+           data: %{}
+         })
+         {_, m1} = Repo.insert(%Membership{
+          user_id: user_id,
+          chat_id: dialog.id
+         })
+         {_, m2} = Repo.insert(%Membership{
+           user_id: other_user_id,
+           chat_id: dialog.id
+         })
+         {:ok, dialog}
+       _ ->
+         {:error, nil}
+    end
   end
 
   def get_for_user(user_id, count, offset_count) do
-    query = from c in Chat,
-                 left_join: m in Membership,
+    memberships_query = from m in Membership,
                  where: m.user_id == ^user_id,
                  where: m.active and not (m.banned or m.denied),
                  limit: ^count,
                  offset: ^offset_count,
-                 select: c
+                 select: m,
+                 distinct: [m.chat_id]
+
+    query = from c in Chat, join: m in subquery(memberships_query), on: c.id == m.chat_id
     Repo.all(query)
   end
 

@@ -41,13 +41,38 @@ defmodule EchoesWeb.ChatChannel do
     {:noreply, socket}
   end
 
-  def handle_in("load_messages", %{"offset" => offset}, %{topic: "chat:" <> chat_id}=socket) do
+  def handle_in(
+        "load_messages_before",
+        %{"message_id" => message_id},
+        %{topic: "chat:" <> chat_id}=socket
+      ) do
+
     {chat_id, _} = Integer.parse chat_id
 
-    messages = Message.with_offset(chat_id, 100, offset)
+    messages = Message.before_id_for_user(socket.assigns.user_id, chat_id, 50, offset)
+    push_loaded_messages(socket, messages, "before")
 
+    {:noreply, socket}
+  end
+
+  def handle_in(
+        "load_messages_after",
+        %{"message_id" => message_id},
+        %{topic: "chat:" <> chat_id}=socket
+      ) do
+
+    {chat_id, _} = Integer.parse chat_id
+
+    messages = Message.after_id_for_user(socket.assigns.user_id, chat_id, 50, offset)
+    push_loaded_messages(socket, messages, "after")
+
+    {:noreply, socket}
+  end
+
+  defp push_loaded_messages(socket, messages, source) do
     push(socket, "messages_loaded", %{
       body: %{
+        source: source,
         messages: Enum.map(messages, fn m ->
           %{
             created_at: m.inserted_at,
@@ -61,8 +86,6 @@ defmodule EchoesWeb.ChatChannel do
         end)
       }
     })
-
-    {:noreply, socket}
   end
 
 end
