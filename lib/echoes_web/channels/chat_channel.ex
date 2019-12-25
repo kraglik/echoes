@@ -16,12 +16,17 @@ defmodule EchoesWeb.ChatChannel do
     {chat_id, _} = Integer.parse chat_id
     if Membership.can_post(socket.assigns.user_id, socket.assigns.membership_id) do
       message = Message.create(socket.assigns.user_id, chat_id, nil, "message", content)
+      author = Repo.get(User, socket.assigns.user_id)
       broadcast_from!(socket, "message", %{
         body: %{
           created_at: message.inserted_at,
           type: "message",
           content: content,
-          author: socket.assigns.user_id,
+          author: %{
+            username: author.username,
+            id: author.id,
+            name: author.name
+          },
           id: message.id,
           chat: message.chat_id
         }
@@ -31,7 +36,11 @@ defmodule EchoesWeb.ChatChannel do
           created_at: message.inserted_at,
           type: "message",
           content: content,
-          author: socket.assigns.user_id,
+          author: %{
+            username: author.username,
+            id: author.id,
+            name: author.name
+          },
           id: message.id,
           local_id: id,
           chat: message.chat_id
@@ -74,11 +83,16 @@ defmodule EchoesWeb.ChatChannel do
       body: %{
         source: source,
         messages: Enum.map(messages, fn m ->
+          user = Repo.one(User, m.author_id)
           %{
             created_at: m.inserted_at,
             type: "message",
             content: m.content,
-            author: m.author_id,
+            author: %{
+              username: user.username,
+              id: user.id,
+              name: user.name
+            },
             id: m.id,
             local_id: nil,
             chat: m.chat_id
