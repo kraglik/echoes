@@ -126,7 +126,7 @@ defmodule Echoes.Message do
                  on: r.user_id == ^user_id,
                  where: m.chat_id == ^chat_id,
                  group_by: m.id,
-                 order_by: [m.chat_id],
+                 order_by: [desc: m.chat_id],
                  limit: 1,
                  select: {m, count(r.id)}
 
