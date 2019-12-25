@@ -55,7 +55,7 @@ defmodule Echoes.Chat do
         Repo.insert(
           %MessageRead{
             user_id: user_id,
-            message_id: first_message
+            message_id: first_message.id
           }
         )
         {:ok, dialog}
