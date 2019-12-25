@@ -2,7 +2,7 @@ defmodule Echoes.Chat do
   use Ecto.Schema
   import Ecto.Query
   import Ecto.Changeset
-  alias Echoes.{Repo, User, Chat, Message, Membership}
+  alias Echoes.{Repo, User, Chat, Message, Membership, MessageRead}
 
   @timestamps_opts [type: :utc_datetime_usec]
   schema "chats" do
@@ -27,27 +27,40 @@ defmodule Echoes.Chat do
                  group_by: m.chat_id,
                  select: m.chat_id
 
-     chat_id = Repo.one(query)
+    chat_id = Repo.one(query)
 
-     case chat_id do
-       nil ->
-         {_, dt} = Ecto.Type.cast(:utc_datetime, DateTime.utc_now)
-         {_, dialog} = Repo.insert(%Chat{
-           last_event_at: dt,
-           type: "dialog",
-           data: %{}
-         })
-         {_, m1} = Repo.insert(%Membership{
-          user_id: user_id,
+    case chat_id do
+      nil ->
+        {_, dt} = Ecto.Type.cast(:utc_datetime, DateTime.utc_now)
+        {_, dialog} = Repo.insert(%Chat{
+          last_event_at: dt,
+          type: "dialog",
+          data: %{}
+        })
+        {_, m1} = Repo.insert(%Membership{
+         user_id: user_id,
+         chat_id: dialog.id
+        })
+        {_, m2} = Repo.insert(%Membership{
+          user_id: other_user_id,
           chat_id: dialog.id
-         })
-         {_, m2} = Repo.insert(%Membership{
-           user_id: other_user_id,
-           chat_id: dialog.id
-         })
-         {:ok, dialog}
-       _ ->
-         {:error, nil}
+        })
+        {_, first_message} = Repo.insert(%Message{
+          author_id: user_id,
+          content: %{event: "created"},
+          type: "info",
+          chat_id: chat_id,
+          origin_id: nil
+        })
+        Repo.insert(
+          %MessageRead{
+            user_id: user_id,
+            message_id: dialog.id
+          }
+        )
+        {:ok, dialog}
+      _ ->
+        {:error, nil}
     end
   end
 

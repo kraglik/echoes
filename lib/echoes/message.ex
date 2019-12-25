@@ -122,24 +122,29 @@ defmodule Echoes.Message do
   def last_message(chat_id, user_id) do
     query = from m in Message,
                  left_join: r in MessageRead,
+                 on: m.id == r.message_id,
                  where: m.chat_id == ^chat_id,
                  where: r.user_id == ^user_id,
                  group_by: m.id,
-                 order_by: [:desc, m.chat_id],
+                 order_by: [desc: m.chat_id],
                  limit: 1,
                  select: {m, count(r.id)}
 
-    [message] = get_messages(query)
-    %{
-      created_at: message.inserted_at,
-      type: "message",
-      content: message.content,
-      author: message.author_id,
-      id: message.id,
-      local_id: nil,
-      chat: message.chat_id,
-      reads: message.reads
-    }
+    case get_messages(query) do
+      [message] ->
+        %{
+          created_at: message.inserted_at,
+          type: "message",
+          content: message.content,
+          author: message.author_id,
+          id: message.id,
+          local_id: nil,
+          chat: message.chat_id,
+          reads: message.reads
+        }
+      [] -> nil
+    end
+
   end
 
   defp get_messages(query) do

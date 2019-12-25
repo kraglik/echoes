@@ -50,6 +50,9 @@ defmodule EchoesWeb.UserChannel do
         nil ->
           push(socket, "dialog_creation_failed", %{body: nil})
           {:noreply, socket}
+        %User{id: target_user_id} when target_user_id == user_id ->
+          push(socket, "dialog_creation_failed", %{body: nil})
+          {:noreply, socket}
         _ ->
           with {status, dialog} = Chat.create_dialog(socket.assigns.user_id, target_user.id) do
             case status do
