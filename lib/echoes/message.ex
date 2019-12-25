@@ -129,16 +129,16 @@ defmodule Echoes.Message do
                  limit: 1,
                  select: {m, count(r.id)}
 
-    [{message, reads_count}] = get_messages(query)
+    [message] = get_messages(query)
     %{
-      created_at: m.inserted_at,
+      created_at: message.inserted_at,
       type: "message",
-      content: m.content,
-      author: m.author_id,
-      id: m.id,
+      content: message.content,
+      author: message.author_id,
+      id: message.id,
       local_id: nil,
-      chat: m.chat_id,
-      reads: reads_count
+      chat: message.chat_id,
+      reads: message.reads
     }
   end
 

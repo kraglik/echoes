@@ -49,7 +49,7 @@ defmodule EchoesWeb.ChatChannel do
 
     {chat_id, _} = Integer.parse chat_id
 
-    messages = Message.before_id_for_user(socket.assigns.user_id, chat_id, 50, offset)
+    messages = Message.before_id_for_user(socket.assigns.user_id, chat_id, message_id, 50)
     push_loaded_messages(socket, messages, "before")
 
     {:noreply, socket}
@@ -63,7 +63,7 @@ defmodule EchoesWeb.ChatChannel do
 
     {chat_id, _} = Integer.parse chat_id
 
-    messages = Message.after_id_for_user(socket.assigns.user_id, chat_id, 50, offset)
+    messages = Message.after_id_for_user(socket.assigns.user_id, chat_id, message_id, 50)
     push_loaded_messages(socket, messages, "after")
 
     {:noreply, socket}

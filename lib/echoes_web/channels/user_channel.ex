@@ -126,16 +126,15 @@ defmodule EchoesWeb.UserChannel do
     {:noreply, socket}
   end
 
-  def handle_in("load_chats", %{"offset" => offset}, %{topic: "user:" <> user_id}=socket) do
-    {user_id, _} = Integer.parse user_id
-    with chats = Chat.get_for_user(user_id, 10, offset) do
+  def handle_in("load_chats", %{"offset" => offset}, socket) do
+    with chats = Chat.get_for_user(socket.assigns.user_id, 10, offset) do
       chats = Enum.map(chats, fn c ->
         %{
           members: Chat.members(c),
           id: c.id,
           data: c.data,
           type: c.type,
-          last_message: Message.last_message(chat.id)
+          last_message: Message.last_message(c.id, socket.assigns.user_id)
         }
       end)
       push(socket, "chats_loaded", %{
