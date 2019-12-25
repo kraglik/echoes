@@ -49,7 +49,7 @@ defmodule Echoes.Chat do
           author_id: user_id,
           content: %{event: "created"},
           type: "info",
-          chat_id: chat_id,
+          chat_id: dialog.id,
           origin_id: nil
         })
         Repo.insert(

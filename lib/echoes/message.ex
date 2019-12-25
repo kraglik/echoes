@@ -123,8 +123,8 @@ defmodule Echoes.Message do
     query = from m in Message,
                  left_join: r in MessageRead,
                  on: m.id == r.message_id,
+                 on: r.user_id == ^user_id,
                  where: m.chat_id == ^chat_id,
-                 where: r.user_id == ^user_id,
                  group_by: m.id,
                  order_by: [desc: m.chat_id],
                  limit: 1,
@@ -134,7 +134,7 @@ defmodule Echoes.Message do
       [message] ->
         %{
           created_at: message.inserted_at,
-          type: "message",
+          type: message.type,
           content: message.content,
           author: message.author_id,
           id: message.id,
@@ -142,7 +142,8 @@ defmodule Echoes.Message do
           chat: message.chat_id,
           reads: message.reads
         }
-      [] -> nil
+      [] ->
+        nil
     end
 
   end
