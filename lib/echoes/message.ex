@@ -75,8 +75,7 @@ defmodule Echoes.Message do
                  where: m.id < ^message_id,
                  where: m.chat_id == ^chat_id,
                  limit: ^count,
-                 group_by: m.id,
-                 order_by: [asc: m.id]
+                 order_by: [desc: m.id]
 
     get_messages(query)
   end
