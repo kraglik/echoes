@@ -28,7 +28,7 @@ defmodule Echoes.File do
     {:ok, file} = Repo.insert(%File{
       filename: params.filename,
       type: params.content_type,
-      url: "http://#{bucket_name}.s3-eu-north-1.amazonaws.com/#{path}"
+      url: "http://#{bucket_name}.s3.amazonaws.com/#{path}"
     })
 
     file
