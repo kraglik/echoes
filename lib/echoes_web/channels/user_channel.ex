@@ -106,7 +106,7 @@ defmodule EchoesWeb.UserChannel do
         %{topic: "user:" <> user_id}=socket
       ) do
 
-    users = User.find_alike(username_part, offset, 20)
+    users = User.find_alike(username_part, offset, 100)
 
     push(socket, "users_like", %{
       body: Enum.map(users, fn user ->

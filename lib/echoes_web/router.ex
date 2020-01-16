@@ -10,6 +10,7 @@ defmodule EchoesWeb.Router do
 
     post "/login", LoginController, :login
     post "/register", RegisterController, :register
+    post "/upload", UploadController, :upload
 
   end
 end

@@ -27,6 +27,12 @@ config :echoes, Echoes.Guardian,
        secret_key: "JWT_SECRET_KEY",
        ttl: {365, :day}
 
+config :ex_aws,
+       json_codec: Jason,
+       access_key_id: System.get_env("AWS_ACCESS_KEY_ID"),
+       secret_access_key: System.get_env("AWS_SECRET_ACCESS_KEY"),
+       region: "eu-north-1"
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 

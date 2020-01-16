@@ -20,7 +20,7 @@ defmodule Echoes.MixProject do
   def application do
     [
       mod: {Echoes.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :ex_aws, :hackney]
     ]
   end
 
@@ -33,6 +33,12 @@ defmodule Echoes.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:mime, "~> 1.3.1"},
+      {:ex_aws, "~> 2.1"},
+      {:ex_aws_s3, "~> 2.0"},
+      {:ex_aws_ses, "~> 2.0"},
+      {:hackney, "~> 1.9"},
+      {:sweet_xml, "~> 0.6"},
       {:guardian, "~> 2.0"},
       {:bcrypt_elixir, "~> 2.0"},
       {:phoenix, "~> 1.4.10"},

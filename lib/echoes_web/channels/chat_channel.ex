@@ -50,6 +50,44 @@ defmodule EchoesWeb.ChatChannel do
     {:noreply, socket}
   end
 
+  def handle_in("image", %{"content" => content, "id" => id}, %{topic: "chat:" <> chat_id}=socket) do
+    {chat_id, _} = Integer.parse chat_id
+    if Membership.can_post(socket.assigns.user_id, socket.assigns.membership_id) do
+      message = Message.create(socket.assigns.user_id, chat_id, nil, "image", content)
+      author = Repo.get(User, socket.assigns.user_id)
+      broadcast_from!(socket, "message", %{
+        body: %{
+          created_at: message.inserted_at,
+          type: "message",
+          content: content,
+          author: %{
+            username: author.username,
+            id: author.id,
+            name: author.name
+          },
+          id: message.id,
+          chat: message.chat_id
+        }
+      })
+      push(socket, "message", %{
+        body: %{
+          created_at: message.inserted_at,
+          type: "message",
+          content: content,
+          author: %{
+            username: author.username,
+            id: author.id,
+            name: author.name
+          },
+          id: message.id,
+          local_id: id,
+          chat: message.chat_id
+        }
+      })
+    end
+    {:noreply, socket}
+  end
+
   def handle_in(
         "load_messages_before",
         %{"message_id" => message_id},
