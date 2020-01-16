@@ -58,7 +58,7 @@ defmodule EchoesWeb.ChatChannel do
       broadcast_from!(socket, "message", %{
         body: %{
           created_at: message.inserted_at,
-          type: "message",
+          type: "image",
           content: content,
           author: %{
             username: author.username,
@@ -72,7 +72,7 @@ defmodule EchoesWeb.ChatChannel do
       push(socket, "message", %{
         body: %{
           created_at: message.inserted_at,
-          type: "message",
+          type: "image",
           content: content,
           author: %{
             username: author.username,
