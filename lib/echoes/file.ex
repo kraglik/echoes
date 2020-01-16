@@ -22,7 +22,7 @@ defmodule Echoes.File do
     end
 
     ExAws.S3.Upload.stream_file(params.path)
-    |> ExAws.S3.upload(bucket_name, path)
+    |> ExAws.S3.upload(bucket_name, path, content_type: params.content_type)
     |> ExAws.request!()
 
     {:ok, file} = Repo.insert(%File{
